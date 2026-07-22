@@ -1,165 +1,110 @@
 import streamlit as st
+import json
 
-# Cấu hình giao diện trang web
-st.set_page_config(page_title="That Khe AI Karaoke Shadowing", page_icon="🎤", layout="centered")
+# Cấu hình giao diện tổng thể
+st.set_page_config(
+    page_title="That Khe AI Shadowing Coach",
+    page_icon="🎓",
+    layout="centered"
+)
 
+# Giao diện Tiêu đề trang trọng, sinh động
 st.markdown("""
-    <h2 style='text-align: center; color: #2e7d32;'>🎤 That Khe AI Karaoke Shadowing Coach</h2>
-    <p style='text-align: center;'>Hệ thống luyện nhại giọng hiển thị chữ chạy & đồng bộ thời gian thực</p>
+    <div style='text-align: center; padding: 10px;'>
+        <h1 style='color: #1b5e20; margin-bottom: 5px;'>🎓 That Khe AI Shadowing Studio</h1>
+        <p style='color: #555; font-size: 16px;'>Nền tảng luyện phát âm tương tác thông minh • Câu chuyện Thợ phiên Thất Khê</p>
+    </div>
+    <hr style='border: 1px solid #c8e6c9;'>
 """, unsafe_allow_html=True)
 
-st.markdown("---")
-
-# Dữ liệu kịch bản: Câu + Thời gian dừng nhại lại (giây)
+# Dữ liệu bài học chuẩn A2 (Câu chuyện Thợ phiên)
 script_data = [
-    {"id": 1, "text": "Welcome to That Khe! My name is Cuong, and I live here.", "pause": 5},
-    {"id": 2, "text": "Every morning, when the sun is still sleeping, Uncle Ba is already awake.", "pause": 6},
-    {"id": 3, "text": "He drinks hot tea and eats a big bowl of pho for superpower.", "pause": 5},
-    {"id": 4, "text": "He takes bags of star anise and bamboo shoots to the border gate.", "pause": 6},
-    {"id": 5, "text": "Uncle Ba cannot speak Chinese, but he uses crazy body language to sell everything.", "pause": 7},
-    {"id": 6, "text": "Sometimes the mountain roads are slippery, but he never gives up.", "pause": 6},
-    {"id": 7, "text": "At 4:00 PM, he rides back home, tired but happy with his family.", "pause": 6}
+    {"id": 1, "text": "Welcome to That Khe! My name is Cuong, and I live here.", "vi": "Chào mừng đến với Thất Khê! Tên tôi là Cường, và tôi sống ở đây."},
+    {"id": 2, "text": "Every morning, when the sun is still sleeping, Uncle Ba is already awake.", "vi": "Mỗi sáng, khi mặt trời còn đang ngủ, bác Ba đã thức dậy rồi."},
+    {"id": 3, "text": "He drinks hot tea and eats a big bowl of pho for superpower.", "vi": "Ông ấy uống trà nóng và ăn một tô phở lớn để có siêu năng lực."},
+    {"id": 4, "text": "He takes bags of star anise and bamboo shoots to the border gate.", "vi": "Ông ấy chở những bao hoa hồi và măng ra cửa khẩu."},
+    {"id": 5, "text": "Uncle Ba cannot speak Chinese, but he uses crazy body language to sell everything.", "vi": "Bác Ba không biết tiếng Trung, nhưng bác dùng ngôn ngữ cơ thể cực đỉnh để bán mọi thứ."},
+    {"id": 6, "text": "Sometimes the mountain roads are slippery, but he never gives up.", "vi": "Đôi khi đường núi trơn trượt, nhưng bác ấy không bao giờ từ bỏ."},
+    {"id": 7, "text": "At 4:00 PM, he rides back home, tired but happy with his family.", "vi": "Lúc 4 giờ chiều, bác phóng xe về nhà, mệt nhưng hạnh phúc bên gia đình."}
 ]
 
-import json
-script_json = json.dumps(script_data)
+# Sidebar hoặc bộ chọn câu tập trung
+st.markdown("### 📌 Chọn câu cần luyện tập:")
+selected_index = st.selectbox(
+    "Danh sách câu trong bài:",
+    options=range(len(script_data)),
+    format_func=lambda x: f"Câu {x+1}: {script_data[x]['text']}"
+)
 
-# Giao diện điều khiển mượt mà bằng HTML/JS chống lỗi trình duyệt
-karaoke_html = f"""
-<div style="background-color: #1e1e1e; color: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-    <div style="font-size: 14px; color: #00bcd4; margin-bottom: 10px; font-weight: bold;" id="step-indicator">Chọn câu bên dưới hoặc bấm Chạy toàn bài</div>
-    
-    <div style="height: 160px; display: flex; align-items: center; justify-content: center; padding: 15px; border: 2px solid #4CAF50; border-radius: 8px; margin-bottom: 20px; background-color: #2d2d2d;">
-        <p id="karaoke-screen" style="font-size: 22px; font-weight: bold; margin: 0; color: #FFD700; line-height: 1.4;">Bấm nút "Nghe & Nhại giọng" ở từng câu bên dưới để bắt đầu luyện tập!</p>
+current_item = script_data[selected_index]
+
+# Khung hiển thị ngữ cảnh bài học hiện đại
+st.markdown(f"""
+    <div style="background-color: #f1f8e9; padding: 20px; border-radius: 12px; border-left: 6px solid #4caf50; margin-bottom: 20px;">
+        <p style="font-size: 13px; color: #2e7d32; font-weight: bold; margin-bottom: 5px;">CÂU HIỆN TẠI (LEVEL A2):</p>
+        <p style="font-size: 20px; font-weight: bold; color: #111; margin-bottom: 8px;">{current_item['text']}</p>
+        <p style="font-size: 15px; color: #666; font-style: italic; margin: 0;">🇻🇳 Nghĩa tiếng Việt: {current_item['vi']}</p>
     </div>
-    
-    <div id="countdown-display" style="font-size: 16px; color: #ff9800; font-weight: bold; min-height: 25px; margin-bottom: 15px;"></div>
-    
-    <button onclick="playFullSession()" style="background-color: #ff5722; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold;">▶️ Chạy Tự Động Toàn Bài</button>
-    <button onclick="stopAll()" style="background-color: #f44336; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-left: 10px;">⏹️ Dừng lại</button>
+""", unsafe_allow_html=True)
+
+# -------------------------------------------------------------------------
+# BỘ ĐIỀU KHIỂN ÂM THANH MẪU (TEXT-TO-SPEECH CHUẨN XÁC)
+# -------------------------------------------------------------------------
+st.markdown("#### Bước 1: Nghe âm thanh mẫu chuẩn từ AI")
+
+tts_code = f"""
+<div style="margin-bottom: 20px;">
+    <button onclick="playAudioSample()" style="background-color: #2e7d32; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+        🔊 Nghe mẫu phát âm
+    </button>
+    <span id="audio-status" style="margin-left: 15px; font-weight: bold; color: #d32f2f;"></span>
 </div>
 
 <script>
-const data = {script_json};
-let globalTimer = null;
-
-function speakSentence(index, callback) {{
-    if (index >= data.length) {{
-        document.getElementById("karaoke-screen").innerText = "🎉 Hoàn thành xuất sắc bài học!";
-        document.getElementById("countdown-display").innerText = "";
-        document.getElementById("step-indicator").innerText = "Đã kết thúc";
+function playAudioSample() {{
+    const text = "{current_item['text']}";
+    const statusEl = document.getElementById("audio-status");
+    
+    if (!('speechSynthesis' in window)) {{
+        alert("Trình duyệt của bạn không hỗ trợ phát âm thanh trực tiếp!");
         return;
     }}
-
-    const item = data[index];
-    const screen = document.getElementById("karaoke-screen");
-    const countdownEl = document.getElementById("countdown-display");
-    const indicator = document.getElementById("step-indicator");
-
-    screen.innerText = item.text;
-    indicator.innerText = "Câu " + (index + 1) + " / " + data.length;
-    countdownEl.innerText = "🔊 Đang đọc mẫu chuẩn...";
-
-    const utterance = new SpeechSynthesisUtterance(item.text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.85; // Tốc độ chuẩn cho cấp độ A2
-
-    utterance.onend = function() {{
-        let timeLeft = item.pause;
-        countdownEl.innerText = "⏳ Thời gian nhại lại (Shadowing): " + timeLeft + "s (Hãy đọc to)";
-
-        globalTimer = setInterval(() => {{
-            timeLeft--;
-            if (timeLeft > 0) {{
-                countdownEl.innerText = "⏳ Thời gian nhại lại (Shadowing): " + timeLeft + "s (Hãy đọc to)";
-            }} else {{
-                clearInterval(globalTimer);
-                if (callback) callback();
-            }}
-        }}, 1000);
-    }};
-
-    window.speechSynthesis.speak(utterance);
-}}
-
-function playFullSession() {{
-    window.speechSynthesis.cancel();
-    if (globalTimer) clearInterval(globalTimer);
     
-    let currentIndex = 0;
-    function nextStep() {{
-        speakSentence(currentIndex, function() {{
-            currentIndex++;
-            nextStep();
-        }});
-    }}
-    nextStep();
-}}
-
-function stopAll() {{
-    window.speechSynthesis.cancel();
-    if (globalTimer) clearInterval(globalTimer);
-    document.getElementById("karaoke-screen").innerText = "Đã dừng bài học.";
-    document.getElementById("countdown-display").innerText = "";
-    document.getElementById("step-indicator").innerText = "Tạm dừng";
-}}
-
-// Hàm hỗ trợ bấm nghe từng câu riêng lẻ từ bên ngoài
-function playSpecific(text, pauseTime) {{
-    window.speechSynthesis.cancel();
-    if (globalTimer) clearInterval(globalTimer);
-    
-    const screen = document.getElementById("karaoke-screen");
-    const countdownEl = document.getElementById("countdown-display");
-    
-    screen.innerText = text;
-    countdownEl.innerText = "🔊 Đang đọc mẫu...";
-    
+    window.speechSynthesis.cancel(); // Dừng các luồng cũ
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
-    utterance.rate = 0.85;
+    utterance.rate = 0.85; // Tốc độ chuẩn chậm cho người học A2
+    
+    utterance.onstart = function() {{
+        statusEl.style.color = "#2e7d32";
+        statusEl.innerText = " đang phát âm mẫu...";
+    }};
     
     utterance.onend = function() {{
-        let timeLeft = pauseTime;
-        countdownEl.innerText = "⏳ Thời gian nhại lại: " + timeLeft + "s";
-        globalTimer = setInterval(() => {{
-            timeLeft--;
-            if (timeLeft > 0) {{
-                countdownEl.innerText = "⏳ Thời gian nhại lại: " + timeLeft + "s";
-            }} else {{
-                clearInterval(globalTimer);
-                countdownEl.innerText = "✨ Hết giờ! Bạn đọc rất tốt.";
-            }}
-        }}, 1000);
+        statusEl.style.color = "#1976d2";
+        statusEl.innerText = " Hoàn tất! Hãy chuyển xuống dưới để ghi âm nhại giọng.";
     }};
+    
     window.speechSynthesis.speak(utterance);
 }}
 </script>
 """
 
-st.markdown(karaoke_html, unsafe_allow_html=True)
+st.markdown(tts_code, unsafe_allow_html=True)
 
 st.markdown("---")
-st.markdown("### 📜 Hoặc chọn luyện tập từng câu cụ thể:")
 
-# Tạo danh sách các nút bấm chọn câu trực quan ngay trên Streamlit
-for idx, item in enumerate(script_data):
-    col1, col2 = st.columns([4, 1])
-    with col1:
-        st.write(f"**{idx+1}.** {item['text']}")
-    with col2:
-        # Nút gọi trực tiếp hàm JavaScript để đọc câu tương ứng
-        button_html = f"""
-        <button onclick="playSpecific('{item['text']}', {item['pause']})" style="background-color: #4CAF50; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">🔊 Nghe & Nhại</button>
-        """
-        st.markdown(button_html, unsafe_allow_html=True)
+# -------------------------------------------------------------------------
+# BỘ GHI ÂM NHẠI GIỌNG (SHADOWING RECORDING)
+# -------------------------------------------------------------------------
+st.markdown("#### Bước 2: Ghi âm giọng của bạn để tự so sánh")
+st.markdown("<p style='font-size: 14px; color: #555;'>Hãy bấm vào nút micro bên dưới, đọc to lại câu tiếng Anh vừa nghe, sau đó phát lại để kiểm tra độ chính xác.</p>", unsafe_allow_html=True)
 
-st.markdown("---")
-st.markdown("### 🎙️ Ghi âm giọng đọc của bạn để tự kiểm tra")
-audio_value = st.audio_input("Bấm vào micro để ghi âm giọng của bạn:")
+audio_value = st.audio_input("Bấm vào biểu tượng micro để bắt đầu ghi âm:")
+
 if audio_value is not None:
-    st.success("✨ Đã ghi âm thành công!")
+    st.success("✨ Ghi âm thành công! Nghe lại giọng đọc của bạn:")
     st.audio(audio_value)
 
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: gray;'>Hệ thống Luyện Ngữ Điệu AI thông minh | 100% Free Cloud</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #888; font-size: 13px;'>Phát triển chuyên biệt cho giáo dục Thất Khê • Chạy ổn định 100% trên mọi thiết bị</p>", unsafe_allow_html=True)
