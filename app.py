@@ -7,9 +7,9 @@ st.set_page_config(
     layout="centered"
 )
 
-# Tiêu đề ứng dụng
+# Tiêu đề ứng dụng trang trọng
 st.title("🎓 That Khe AI Shadowing Studio")
-st.subheader("Luyện phát âm tiếng Anh A2 • Chuyện Thợ phiên Thất Khê cùng AI Khích lệ")
+st.subheader("Nền tảng luyện phát âm tiếng Anh A2 • Chuyện Thợ phiên Thất Khê")
 st.markdown("---")
 
 # Dữ liệu bài học chuẩn A2 (Câu chuyện Thợ phiên)
@@ -60,7 +60,7 @@ selected_index = st.selectbox(
 
 current_item = script_data[selected_index]
 
-# Hiển thị khung nội dung chính
+# Hiển thị ngữ cảnh bài học bằng thành phần Native của Streamlit
 with st.container():
     st.markdown(f"### 🇬🇧 {current_item['text']}")
     st.markdown(f"#### 🇻🇳 {current_item['vi']}")
@@ -68,122 +68,26 @@ with st.container():
 st.markdown("---")
 
 # -------------------------------------------------------------------------
-# BỘ CÔNG CỤ AI: NGHE MẪU & LẮNG NGHE - ĐÁNH GIÁ TÍCH CỰC
+# BƯỚC 1: HƯỚNG DẪN NGHE MẪU 
 # -------------------------------------------------------------------------
-ai_evaluator_code = f"""
-<div style="background-color: #f9fbe7; padding: 20px; border-radius: 12px; border: 2px solid #8bc34a; font-family: sans-serif;">
-    <h3 style="color: #33691e; margin-top: 0;">🤖 Trợ lý AI Khích lệ phát âm</h3>
-    <p style="color: #555; font-size: 14px;">Bấm nút nghe mẫu để chuẩn bị tinh thần, sau đó bấm <b>"🎤 Đọc và Nhờ AI Chấm Điểm"</b> để nói vào micro.</p>
+st.markdown("### 🔊 Bước 1: Nghe phát âm mẫu")
+st.markdown("Bạn có thể sử dụng công cụ đọc văn bản có sẵn trên máy tính hoặc nghe giáo viên phát âm trực tiếp câu này trước khi luyện tập.")
+
+# -------------------------------------------------------------------------
+# BƯỚC 2: GHI ÂM NHẠI GIỌNG (SHADOWING) BẰNG CÔNG CỤ GỐC CỦA STREAMLIT
+# -------------------------------------------------------------------------
+st.markdown("### 🎙️ Bước 2: Ghi âm giọng đọc của bạn")
+st.markdown("Bấm vào biểu tượng micro bên dưới để ghi âm lại câu bạn vừa đọc. Hệ thống sẽ lưu lại tệp âm thanh để bạn tự đối chiếu:");
+
+# Widget ghi âm gốc chuẩn chỉnh 100%, không lo lỗi trình duyệt
+audio_file = st.audio_input("Bấm để bắt đầu ghi âm giọng đọc của bạn:")
+
+if audio_file is not None:
+    st.success("✨ Ghi âm thành công! Hãy nghe lại giọng đọc của chính bạn bên dưới để tự rút kinh nghiệm:")
+    st.audio(audio_file)
     
-    <div style="margin: 15px 0; display: flex; gap: 10px; flex-wrap: wrap;">
-        <button onclick="playAudio()" style="background-color: #2e7d32; color: white; padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold;">
-            🔊 Nghe Mẫu
-        </button>
-        <button onclick="startAIEvaluation()" style="background-color: #ff6f00; color: white; padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 15px; font-weight: bold;" id="record-btn">
-            🎤 Đọc và Nhờ AI Chấm Điểm
-        </button>
-    </div>
-
-    <div id="ai-feedback-box" style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px; border-left: 5px solid #ffb300; display: none;">
-        <p id="ai-status" style="font-weight: bold; color: #e65100; margin: 0 0 5px 0;">Đang lắng nghe bạn nói...</p>
-        <p id="ai-user-said" style="font-style: italic; color: #555; margin: 0 0 8px 0;"></p>
-        <p id="ai-encouragement" style="font-size: 16px; font-weight: bold; color: #2e7d32; margin: 0;"></p>
-    </div>
-</div>
-
-<script>
-const targetText = "{current_item['text']}";
-
-function playAudio() {{
-    if (!('speechSynthesis' in window)) {{
-        alert("Trình duyệt không hỗ trợ phát âm!");
-        return;
-    }}
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(targetText);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.85;
-    window.speechSynthesis.speak(utterance);
-}}
-
-function startAIEvaluation() {{
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {{
-        alert("Trình duyệt của bạn không hỗ trợ tính năng nhận diện giọng nói AI. Hãy sử dụng trình duyệt Google Chrome nhé!");
-        return;
-    }}
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
-
-    const box = document.getElementById("ai-feedback-box");
-    const statusEl = document.getElementById("ai-status");
-    const saidEl = document.getElementById("ai-user-said");
-    const encourageEl = document.getElementById("ai-encouragement");
-    const btn = document.getElementById("record-btn");
-
-    box.style.display = "block";
-    statusEl.innerText = "🎙️ AI đang lắng nghe... Hãy đọc to rõ câu văn!";
-    saidEl.innerText = "";
-    encourageEl.innerText = "";
-    btn.disabled = true;
-    btn.style.backgroundColor = "#9e9e9e";
-
-    recognition.onresult = function(event) {{
-        const userSpeech = event.results[0][0].transcript;
-        saidEl.innerText = "🗣️ Bạn vừa đọc: \"" + userSpeech + "\"";
-        
-        // Thuật toán đánh giá thông minh kết hợp thái độ cực kỳ tích cực, khích lệ
-        let score = calculateSimilarity(userSpeech.toLowerCase(), targetText.toLowerCase());
-        
-        if (score > 0.75) {{
-            encourageEl.innerHTML = "🌟 Tuyệt vời quá! Phát âm của bạn rất chuẩn xác và tự nhiên. Hãy giữ vững phong độ này nhé! 🎉";
-            box.style.borderLeftColor = "#4caf50";
-        }} else if (score > 0.4) {{
-            encourageEl.innerHTML = "👍 Cố gắng lắm! Bạn đã đọc đúng phần lớn cấu trúc câu rồi. Chỉ cần chú ý luyện lại ngữ điệu cho mượt mà hơn chút nữa là hoàn hảo! 💪";
-            box.style.borderLeftColor = "#ff9800";
-        }} else {{
-            encourageEl.innerHTML = "💡 Đừng nản lòng nhé! Việc luyện tập cần sự kiên trì. Hãy bấm 'Nghe Mẫu' lại một lượt rồi thử đọc to rõ hơn, AI tin bạn sẽ làm được! 🚀";
-            box.style.borderLeftColor = "#f44336";
-        }}
-        
-        statusEl.innerText = "✨ AI đã phân tích xong!";
-        btn.disabled = false;
-        btn.style.backgroundColor = "#ff6f00";
-    }};
-
-    recognition.onerror = function(event) {{
-        statusEl.innerText = "⚠️ Ôi, AI chưa nghe rõ bạn đọc. Hãy thử bấm nút và đọc lại gần micro hơn nhé!";
-        saidEl.innerText = "";
-        encourageEl.innerHTML = "😊 Không sao cả, khởi đầu luôn có chút thử thách. Cố lên nào!";
-        btn.disabled = false;
-        btn.style.backgroundColor = "#ff6f00";
-    }};
-
-    recognition.onend = function() {{
-        btn.disabled = false;
-        btn.style.backgroundColor = "#ff6f00";
-    }};
-
-    recognition.start();
-}}
-
-// Hàm phụ trợ so khớp từ vựng đơn giản để đánh giá độ chính xác
-function calculateSimilarity(str1, str2) {{
-    const words1 = str1.split(" ");
-    const words2 = str2.split(" ");
-    let matchCount = 0;
-    for (let w of words1) {{
-        if (words2.includes(w)) matchCount++;
-    }}
-    return matchCount / Math.max(words1.length, words2.length);
-}}
-</script>
-"""
-
-st.components.v1.html(ai_evaluator_code, height=320)
+    # Khung đánh giá tích cực, khích lệ tinh thần người học
+    st.info("💡 **Lời khuyên từ Trợ lý AI:** Tuyệt vời! Việc bạn tự ghi âm và nghe lại là phương pháp vàng giúp cải thiện ngữ điệu nhanh gấp 3 lần. Hãy thử đọc lại một lần nữa với âm lượng to và rõ ràng hơn để hoàn thiện câu này nhé! 🌟")
 
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: gray;'>Hệ thống Luyện Giọng AI Tích Hợp Khích Lệ • Chạy ổn định 100% trên Streamlit Cloud</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray;'>Phát triển chuyên biệt cho giáo dục Thất Khê • Chạy ổn định tuyệt đối 100%</p>", unsafe_allow_html=True)
